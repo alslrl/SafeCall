@@ -1,11 +1,5 @@
-const STATUS_MAP = {
-  normal: { text: '정상', emoji: '🟢', color: '#34c759' },
-  fire: { text: '수증기 감지', emoji: '🔥', color: '#f59e0b' },
-  fall: { text: '낙상 감지', emoji: '⚠️', color: '#ef4444' },
-  burglar: { text: '이상 행동 감지', emoji: '🚨', color: '#8b5cf6' },
-}
-
 const VIDEO_MAP: Record<string, string> = {
+  normal: '/videos/homecam-normal.mp4',
   fire: '/videos/scenario-fire.mp4',
   fall: '/videos/scenario-fall.mp4',
   burglar: '/videos/scenario-burglar.mp4',
@@ -14,7 +8,6 @@ const VIDEO_MAP: Record<string, string> = {
 type CamMode = 'normal' | 'fire' | 'fall' | 'burglar'
 
 export default function HomecamView({ mode = 'normal' }: { mode?: CamMode }) {
-  const status = STATUS_MAP[mode]
   const videoSrc = VIDEO_MAP[mode]
 
   return (
@@ -40,13 +33,8 @@ export default function HomecamView({ mode = 'normal' }: { mode?: CamMode }) {
         </div>
       )}
       <div className="homecam-overlay">
-        <span className="homecam-badge badge-live">LIVE</span>
-        <span
-          className="homecam-badge badge-status"
-          style={{ borderLeft: `3px solid ${status.color}` }}
-        >
-          {status.emoji} {status.text}
-        </span>
+        <span className="homecam-live-dot" />
+        <span className="homecam-live-text">LIVE</span>
       </div>
     </div>
   )

@@ -145,77 +145,80 @@ Realistic CCTV quality, slightly grainy. 15 seconds duration.
 
 ---
 
-## 시나리오 3: 침입 망상 (치매 환각)
+## 시나리오 3: 침입 오인 (거울/TV 오인)
 
 ### 목적
-치매 어르신이 환각/망상으로 "누군가 집에 들어왔다"고 확신하여 112에 신고하는 장면. 실제로는 **아무 일도 일어나지 않은** 조용한 밤. Gemini가 홈캠 영상을 분석하여 "침입 흔적 없음, 환각/망상 가능성"으로 판단하는 근거가 되는 영상.
+치매 어르신이 거울에 비친 자기 자신이나 TV 속 인물을 보고 "집에 모르는 사람이 들어왔다"며 112에 신고하는 장면. 실제로는 **침입자가 없는** 안전한 상황. Gemini가 홈캠 영상을 분석하여 "침입 흔적 없음, 거울/TV 오인"으로 판단하는 근거가 되는 영상.
 
-> **배경**: 알츠하이머나 루이소체 치매 환자들은 "집에 도둑이 들었다", "누군가 나를 감금했다"는 생생한 망상을 겪습니다. 이때 112 신고는 환자에게 아주 합리적인 생존 행동이지만, 실제로는 비응급 상황입니다.
+> **배경**: 알츠하이머나 루이소체 치매 환자들은 거울에 비친 자신의 모습을 타인으로 인식하거나, TV 속 인물이 실제로 방 안에 있다고 믿는 증상(거울 착각, TV 현상)을 겪습니다. 이때 112 신고는 환자에게 아주 합리적인 생존 행동이지만, 실제로는 비응급 상황입니다.
 
 ### 씬 구성
 
 | 씬 | 설명 | 시간 | Gemini 판단 |
 |----|------|------|------------|
-| 3-1 | 거실 전경 — 어두운 밤, 어르신 혼자 소파에 앉아 있음 | 0~3초 | 정상 (1인 재실) |
-| 3-2 | 어르신이 갑자기 불안한 표정으로 주위를 두리번거림 | 3~7초 | 불안 행동 감지, 외부 자극 없음 |
-| 3-3 | 일어나서 현관문/복도를 확인하러 감 (아무도 없음) | 7~12초 | 침입 흔적 없음, 문 잠김 상태 |
-| 3-4 | 돌아와서 전화기를 들고 112에 신고함 | 12~15초 | 비응급 확인 (환각/망상 가능성) |
+| 3-1 | 거실 전경 — 어르신이 소파에서 TV를 보고 있음 | 0~3초 | 정상 (1인 재실, TV 시청 중) |
+| 3-2 | 어르신이 TV 화면/거울을 보며 놀라고 불안해함 | 3~7초 | 불안 행동 감지, TV 또는 거울 반사 확인 |
+| 3-3 | 일어나서 TV/거울 쪽을 가리키며 두려워함 (침입자 없음) | 7~12초 | 침입 흔적 없음, TV/거울만 존재 |
+| 3-4 | 전화기를 들고 112에 신고함 | 12~15초 | 비응급 확인 (거울/TV 오인 가능성) |
 
 ### 이미지 프롬프트
 
-**씬 3-1: 거실 전경 (어두운 밤, 혼자)**
+**씬 3-1: 거실 전경 (TV 시청 중)**
 ```
 A Korean apartment living room viewed from a wall-mounted security camera angle,
-slightly elevated perspective looking down. Dimly lit room at night,
-only a small table lamp on. An elderly Korean woman sitting alone on the sofa,
-looking slightly uneasy. The room is quiet and undisturbed — everything is in order.
-No other people or animals present. Night time.
+slightly elevated perspective looking down. An elderly Korean woman sitting alone
+on the sofa watching TV. The TV screen is on showing a drama or news program
+with people visible on screen. A large mirror or reflective glass surface is
+visible on the wall near the TV. The room is calm and normal.
+Daytime, warm lighting.
 Realistic home CCTV footage style, slightly grainy quality, wide-angle lens.
 ```
 
-**씬 3-2: 불안한 표정으로 두리번거림**
+**씬 3-2: TV/거울을 보며 놀라는 장면**
 ```
-Same Korean apartment living room from wall-mounted security camera angle at night.
-An elderly Korean woman sitting on the sofa looking frightened and agitated,
-turning her head side to side as if hearing something. She is gripping
-the armrest tightly. The room around her is completely calm and undisturbed —
-no movement, no shadows, nothing out of place. She appears to be reacting
-to something that is not visible on camera.
-Dim lighting. Realistic home CCTV footage, slightly grainy.
+Same Korean apartment living room from wall-mounted security camera angle.
+An elderly Korean woman sitting on the sofa looking startled and frightened,
+staring intensely at the TV screen or the mirror on the wall.
+The TV shows a person on screen, or her own reflection is visible in the mirror.
+She appears to believe someone else is in the room with her.
+The room is completely safe — no other person is actually present.
+Realistic home CCTV footage, slightly grainy.
 ```
 
-**씬 3-3: 현관문 확인 (아무도 없음)**
+**씬 3-3: TV/거울 쪽을 가리키며 두려워함**
 ```
-Same Korean apartment from wall-mounted security camera angle at night.
-An elderly Korean woman cautiously walking toward the front door/hallway,
-peering around the corner with a fearful expression. The hallway is empty
-and the front door is clearly closed and locked. There is absolutely no sign
-of intrusion — no broken items, no open windows, no unusual shadows.
-The apartment is perfectly still and safe.
-Dim lighting. Realistic home CCTV footage style, slightly grainy.
+Same Korean apartment living room from wall-mounted security camera angle.
+An elderly Korean woman standing up from the sofa, pointing fearfully
+at the TV screen or the mirror on the wall. She looks terrified,
+backing away slightly. The TV clearly shows a drama/news with people on screen,
+or the mirror clearly reflects her own image. There is no actual intruder —
+only the TV image or mirror reflection that she is mistaking for a real person.
+The front door is closed, no signs of intrusion.
+Realistic home CCTV footage style, slightly grainy.
 ```
 
 **씬 3-4: 112 신고**
 ```
-Same Korean apartment living room from wall-mounted security camera angle at night.
-An elderly Korean woman back on the sofa, holding a smartphone to her ear
-with a trembling hand, speaking urgently. Her expression shows genuine fear
-and distress. However, the room behind her is completely peaceful and undisturbed.
-There is a stark contrast between her panicked state and the calm, safe environment.
-Dim lighting, night time. Realistic home CCTV footage style, slightly grainy.
+Same Korean apartment living room from wall-mounted security camera angle.
+An elderly Korean woman holding a smartphone to her ear with a trembling hand,
+speaking urgently. She keeps glancing at the TV or mirror with fear.
+The TV is still on showing people on screen. The room is completely safe
+with no actual intruder present. There is a clear contrast between
+her panicked state and the harmless TV/mirror reflection.
+Realistic home CCTV footage style, slightly grainy.
 ```
 
 ### Veo 영상 프롬프트 (씬 3-1 이미지 기반)
 ```
-Home security camera footage of a Korean apartment living room at night.
-Dim lighting with only a table lamp. An elderly woman is sitting alone on the sofa.
-She suddenly looks frightened, turning her head as if hearing something —
-but the room is completely quiet and undisturbed. She stands up cautiously
-and walks toward the hallway to check the front door. The hallway is empty,
-the door is closed. She returns to the sofa looking distressed and picks up
-her phone to make an urgent call. Throughout the entire scene, the apartment
-remains perfectly calm with no signs of intrusion or disturbance.
-Fixed camera angle, no camera movement. Night CCTV quality,
+Home security camera footage of a Korean apartment living room.
+An elderly woman is sitting on the sofa watching TV. She suddenly looks startled,
+staring at the TV screen where a person appears in a drama scene.
+She looks frightened, stands up and points at the TV or a mirror on the wall,
+believing someone has entered her home. She backs away fearfully and picks up
+her phone to make an urgent call to the police. Throughout the entire scene,
+there is no actual intruder — only the TV image and her own mirror reflection.
+The apartment is completely safe with the front door closed.
+Fixed camera angle, no camera movement. Realistic CCTV quality,
 slightly grainy. 15 seconds duration.
 ```
 

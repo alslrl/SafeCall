@@ -1,20 +1,50 @@
 import { Page } from 'framework7-react'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAppState, type ScenarioType } from '../../context/AppStateContext'
 import { analyzeScenario, getFallbackResult } from '../../services/gemini'
 
-const PRESETS: Record<ScenarioType, string[]> = {
+interface Preset {
+  label: string
+  text: string
+  audio: string
+}
+
+const PRESETS: Record<ScenarioType, Preset[]> = {
   fire_false_alarm: [
-    '불이요! 부엌에서 연기가 나요!',
-    '화재입니다! 빨리 와주세요!',
+    {
+      label: '"불이 났어요! 빨리 와주세요..."',
+      text: '서울 세빛둥둥섬 3층 비스타인데요!! 불이 났어요! 빨리 와주세요 빨리!!!',
+      audio: '/audio/fire-1.mp3',
+    },
+    {
+      label: '"큰불이 났어! 소방차 빨리 보내요..."',
+      text: '아이고 119죠? 우리 집에 큰불이 났어! 가스레인지 쪽에서 하얀 연기가 천장까지 덮쳤어! 주소? 주소가... 여기 은평구... 아유 몰라, 불길이 번지고 있으니까 소방차부터 빨리 보내요!!',
+      audio: '/audio/fire-2.mp3',
+    },
   ],
   fall_detected: [
-    '사람이 쓰러졌어요! 빨리 와주세요!',
-    '엄마가 넘어졌어요! 움직이지 못해요!',
+    {
+      label: '"넘어졌는데 꼼짝을 못 하겠어..."',
+      text: '아이고... 119 좀... 나 좀 살려줘요. 걷다가 넘어졌는데... 허리가 끊어질 것 같아서 바닥에서 꼼짝을 못 하겠어... 나 혼자 있는데 어떡해, 피도 나는 것 같아...',
+      audio: '/audio/fall-1.mp3',
+    },
+    {
+      label: '"다리가 안 움직여... 구급차 보내줘요..."',
+      text: '여보세요... 거기 구급차 좀 보내줘요... 방금 넘어졌는데 다리가 아예 안 움직여... 전화기도 겨우 잡았어... 너무 아파 죽겠어, 제발 빨리 와서 문 좀 따고 들어와 줘요...',
+      audio: '/audio/fall-2.mp3',
+    },
   ],
   burglar_false_alarm: [
-    '도둑이요! 누가 집에 들어왔어요!',
-    '누가 있어요! 무서워요! 빨리 와주세요!',
+    {
+      label: '"남자가 칼 들고 서 있어! 빨리 와주세요..."',
+      text: '경찰서죠? 빨리 무장하고 와주세요! 저기 시커먼 옷 입은 남자가 칼을 들고 서 있어! 내가 나가라고 소리쳐도 안 나가고 나를 계속 노려봐! 무서워 죽겠어, 빨리 와서 잡아 가요!',
+      audio: '/audio/burglar-1.mp3',
+    },
+    {
+      label: '"도둑이야! 현관문을 부수려고 해..."',
+      text: '여보세요 경찰이죠? 도둑이야 도둑! 지금 누가 밖에서 우리 집 도어락을 계속 누르고 현관문을 부수려고 해! 문고리가 막 덜컹거린다니까? 나 묶어놓고 돈 훔쳐 가려나 봐, 빨리 경찰차 보내요!',
+      audio: '/audio/burglar-2.mp3',
+    },
   ],
 }
 
@@ -24,12 +54,9 @@ export default function CallPage({ f7router }: { f7router: any }) {
   const [seconds, setSeconds] = useState(0)
   const [sent, setSent] = useState(false)
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null)
-  const [recording, setRecording] = useState(false)
-  const [recorded, setRecorded] = useState(false)
-  const [recordSeconds, setRecordSeconds] = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   const callNumber = dialedNumber || (scenario === 'burglar_false_alarm' ? '112' : '119')
 
@@ -61,53 +88,30 @@ export default function CallPage({ f7router }: { f7router: any }) {
 
   const handleSelectPreset = (index: number) => {
     setSelectedPreset(index)
-    setRecorded(false)
-    stopRecording()
+
+    // 기존 오디오 정지
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current = null
+    }
+
+    // TTS 오디오 재생
+    const preset = PRESETS[scenario][index]
+    const audio = new Audio(preset.audio)
+    audioRef.current = audio
+    setIsPlaying(true)
+    audio.play().catch(() => {})
+    audio.onended = () => setIsPlaying(false)
+    audio.onerror = () => setIsPlaying(false)
   }
 
-  const startRecording = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const recorder = new MediaRecorder(stream)
-
-      recorder.onstop = () => {
-        stream.getTracks().forEach(t => t.stop())
-        setRecording(false)
-        setRecorded(true)
-      }
-
-      mediaRecorderRef.current = recorder
-      recorder.start()
-      setRecording(true)
-      setSelectedPreset(null)
-      setRecordSeconds(0)
-
-      recordTimerRef.current = setInterval(() => {
-        setRecordSeconds(prev => prev + 1)
-      }, 1000)
-    } catch {
-      // 마이크 권한 거부 시 무시
-    }
-  }, [])
-
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop()
-    }
-    if (recordTimerRef.current) {
-      clearInterval(recordTimerRef.current)
-      recordTimerRef.current = null
-    }
-  }, [])
-
-  const handleSend = useCallback(async () => {
+  const handleSend = async () => {
+    if (selectedPreset === null) return
     setSent(true)
     setIsAnalyzing(true)
     setState('ANALYZING')
 
-    const callerMessage = selectedPreset !== null
-      ? PRESETS[scenario][selectedPreset]
-      : '사용자가 직접 음성으로 상황을 설명했습니다'
+    const callerMessage = PRESETS[scenario][selectedPreset].text
 
     try {
       const result = await analyzeScenario(scenario, callerMessage)
@@ -119,18 +123,16 @@ export default function CallPage({ f7router }: { f7router: any }) {
       setIsAnalyzing(false)
       setState('ALERT_SENT')
     }
-  }, [setState, setAnalysisResult, setIsAnalyzing, scenario, selectedPreset])
+  }
 
   const handleEndCall = () => {
     if (timerRef.current) clearInterval(timerRef.current)
-    stopRecording()
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
     if (state === 'CALLING_119' || state === 'ANALYZING') {
       setState('IDLE')
     }
     f7router.back()
   }
-
-  const canSend = selectedPreset !== null || recorded
 
   return (
     <Page noNavbar noToolbar>
@@ -152,47 +154,25 @@ export default function CallPage({ f7router }: { f7router: any }) {
 
             {/* 프리셋 목록 */}
             <div className="preset-list">
-              {PRESETS[scenario].map((text, i) => (
+              {PRESETS[scenario].map((preset, i) => (
                 <button
                   key={i}
                   className={`preset-item ${selectedPreset === i ? 'selected' : ''}`}
                   onClick={() => handleSelectPreset(i)}
                 >
-                  <span className="preset-icon">📋</span>
-                  <span className="preset-text">{text}</span>
+                  <span className="preset-icon">{selectedPreset === i && isPlaying ? '🔊' : '📋'}</span>
+                  <span className="preset-text">{preset.label}</span>
                 </button>
               ))}
             </div>
 
-            {/* 구분선 */}
-            <div className="voice-divider">
-              <span>또는</span>
-            </div>
-
-            {/* 녹음 버튼 */}
-            {recording ? (
-              <button className="record-btn recording" onClick={stopRecording}>
-                <span className="record-dot" />
-                <span>녹음 중 {formatTime(recordSeconds)}</span>
-              </button>
-            ) : recorded ? (
-              <div className="record-btn recorded">
-                <span>✅ 녹음 완료 ({formatTime(recordSeconds)})</span>
-              </div>
-            ) : (
-              <button className="record-btn" onClick={startRecording}>
-                <span className="record-dot idle" />
-                <span>🎙️ 직접 녹음</span>
-              </button>
-            )}
-
             {/* 전송 버튼 */}
             <button
               className="send-voice-btn"
-              disabled={!canSend}
+              disabled={selectedPreset === null}
               onClick={handleSend}
             >
-              📤 전송
+              전송
             </button>
           </div>
         )}

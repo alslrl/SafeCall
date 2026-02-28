@@ -50,7 +50,7 @@ const SYSTEM_PROMPT = `당신은 SafeCall AI 상황 분석 시스템입니다. �
 판단 카테고리:
 - "화재 오인": 수증기/김/조리 연기를 화재로 오인한 경우
 - "낙상 감지": 실제로 사람이 바닥에 쓰러져 있는 경우 (실제 응급)
-- "침입 망상": 아무도 없는데 침입자가 있다고 착각하는 경우 (치매 환각/망상)
+- "침입 오인": 거울에 비친 자신이나 TV 속 인물을 보고 침입자로 오인한 경우 (치매 환각/망상)
 
 응답 규칙:
 - confidence는 0~100 사이의 정수로 판단 확신도를 표시
@@ -67,7 +67,7 @@ const ANALYSIS_RESPONSE_SCHEMA = {
   properties: {
     category: {
       type: 'string' as const,
-      description: '분석 카테고리 (예: 화재 오인, 낙상 감지, 침입 망상)',
+      description: '분석 카테고리 (예: 화재 오인, 낙상 감지, 침입 오인)',
     },
     confidence: {
       type: 'number' as const,
@@ -125,7 +125,7 @@ export async function analyzeScenario(
 위 홈캠 영상을 분석하여 실제 응급 상황인지 판단해주세요.`
 
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3-flash-preview',
     config: {
       systemInstruction: SYSTEM_PROMPT,
       responseMimeType: 'application/json',
@@ -179,14 +179,15 @@ export function getFallbackResult(scenario: ScenarioType): AnalysisResult {
       recommendedAction: '실제 응급 상황으로 판단됩니다. 즉시 확인이 필요합니다.',
     },
     burglar_false_alarm: {
-      category: '침입 망상',
-      confidence: 92,
+      category: '침입 오인',
+      confidence: 95,
       isFalseAlarm: true,
       findings: [
         { emoji: '🟢', text: '침입 흔적 없음 — 문/창문 정상' },
-        { emoji: '❌', text: '환각/망상 가능성 높음' },
+        { emoji: '📺', text: 'TV 화면 또는 거울 반사 감지' },
+        { emoji: '❌', text: '외부 침입자 미확인 — 오인 가능성 높음' },
       ],
-      reasoning: '홈캠에서 침입자나 이상 징후가 감지되지 않았습니다. 치매 관련 망상으로 판단됩니다.',
+      reasoning: '홈캠에서 침입 흔적이 없으며, 거울에 비친 본인 또는 TV 속 인물을 침입자로 오인한 것으로 판단됩니다.',
       recommendedAction: '오인으로 판단됩니다. 어르신에게 안심 전달을 권장합니다.',
     },
   }

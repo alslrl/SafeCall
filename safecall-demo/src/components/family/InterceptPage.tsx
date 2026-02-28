@@ -2,12 +2,13 @@ import { Page, Navbar, Block, Button, Card, CardContent } from 'framework7-react
 import { useState, useEffect, useRef } from 'react'
 import { useAppState } from '../../context/AppStateContext'
 import HomecamView from '../shared/HomecamView'
+import FamilyBottomNav from './FamilyBottomNav'
 
 export default function FamilyInterceptPage({ f7router }: { f7router: any }) {
   const { scenario, setState } = useAppState()
   const isBurglar = scenario === 'burglar_false_alarm'
   const callNumber = isBurglar ? '112' : '119'
-  const targetLabel = isBurglar ? '침입 망상 건' : '화재 오인 건'
+  const targetLabel = isBurglar ? '침입 오인 건' : '화재 오인 건'
   const [remainingSeconds, setRemainingSeconds] = useState(2 * 60 * 60) // 2시간
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -34,44 +35,43 @@ export default function FamilyInterceptPage({ f7router }: { f7router: any }) {
   }
 
   return (
-    <Page>
-      <Navbar title="SafeCall 보호자" backLink="뒤로" />
-
-      <Block strong inset>
-        <div className="intercept-status">
-          <div style={{ fontSize: 28, marginBottom: 8 }}>🛡️</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#007aff' }}>
-            인터셉트 모드 활성화
-          </div>
+    <Page pageContent={false}>
+      <Navbar title="SafeCall" backLink="뒤로" />
+      <div className="page-content">
+        <div className="homecam-top-section">
+          <HomecamView mode="normal" />
         </div>
-      </Block>
 
-      <Card>
-        <CardContent>
-          <div style={{ fontSize: 14, color: '#8e8e93' }}>대상</div>
-          <div style={{ fontSize: 16, fontWeight: 600, marginTop: 2 }}>{targetLabel}</div>
-
-          <div style={{ marginTop: 16, fontSize: 14, color: '#8e8e93' }}>남은 시간</div>
-          <div className="intercept-timer">{formatCountdown(remainingSeconds)}</div>
-
-          <div style={{ fontSize: 13, color: '#8e8e93', textAlign: 'center' }}>
-            어머니가 다시 {callNumber}를 누르면<br />AI가 안심 대화를 진행합니다
+        <Block strong inset>
+          <div className="intercept-status">
+            <div style={{ fontSize: 28, marginBottom: 8 }}>🛡️</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#007aff' }}>
+              인터셉트 모드 활성화
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </Block>
 
-      <div style={{ padding: '0 16px', marginBottom: 12 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#8e8e93', marginBottom: 8, paddingLeft: 4 }}>
-          홈캠
-        </div>
-        <HomecamView mode="normal" />
+        <Card>
+          <CardContent>
+            <div style={{ fontSize: 14, color: '#8e8e93' }}>대상</div>
+            <div style={{ fontSize: 16, fontWeight: 600, marginTop: 2 }}>{targetLabel}</div>
+
+            <div style={{ marginTop: 16, fontSize: 14, color: '#8e8e93' }}>남은 시간</div>
+            <div className="intercept-timer">{formatCountdown(remainingSeconds)}</div>
+
+            <div style={{ fontSize: 13, color: '#8e8e93', textAlign: 'center' }}>
+              어머니가 다시 {callNumber}를 누르면<br />AI가 안심 대화를 진행합니다
+            </div>
+          </CardContent>
+        </Card>
+
+        <Block>
+          <Button large fill color="red" onClick={handleRelease}>
+            🔴 인터셉트 해제
+          </Button>
+        </Block>
       </div>
-
-      <Block>
-        <Button large fill color="red" onClick={handleRelease}>
-          🔴 인터셉트 해제
-        </Button>
-      </Block>
+      <FamilyBottomNav active="home" />
     </Page>
   )
 }

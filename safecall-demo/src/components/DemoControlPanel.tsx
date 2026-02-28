@@ -3,7 +3,7 @@ import { useAppState, type ScenarioType, type AppState } from '../context/AppSta
 const SCENARIOS: { type: ScenarioType; emoji: string; label: string; number: string; color: string }[] = [
   { type: 'fire_false_alarm', emoji: '🔥', label: '화재 오인', number: '119', color: '#f59e0b' },
   { type: 'fall_detected', emoji: '🤕', label: '낙상 감지', number: '119', color: '#ef4444' },
-  { type: 'burglar_false_alarm', emoji: '🚨', label: '침입 망상', number: '112', color: '#8b5cf6' },
+  { type: 'burglar_false_alarm', emoji: '🚨', label: '침입 오인', number: '112', color: '#8b5cf6' },
 ]
 
 const STATE_LABELS: Record<AppState, string> = {
