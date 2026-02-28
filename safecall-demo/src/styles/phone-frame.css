@@ -9,6 +9,10 @@
 
 .demo-header {
   margin-bottom: 12px;
+  max-width: 1010px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 }
 
 .demo-header h1 {
