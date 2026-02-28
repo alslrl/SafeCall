@@ -152,6 +152,41 @@ export async function analyzeScenario(
   return JSON.parse(text) as AnalysisResult
 }
 
+// ── TTS 음성 생성 ──
+
+export async function generateTTS(text: string): Promise<ArrayBuffer> {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
+  if (!apiKey || apiKey === 'your_api_key_here') {
+    throw new Error('Gemini API key not configured')
+  }
+
+  const ai = new GoogleGenAI({ apiKey })
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash-preview-tts',
+    contents: [{ parts: [{ text: `따뜻하고 차분한 목소리로 말해주세요: ${text}` }] }],
+    config: {
+      responseModalities: ['AUDIO'],
+      speechConfig: {
+        voiceConfig: {
+          prebuiltVoiceConfig: { voiceName: 'Kore' },
+        },
+      },
+    },
+  })
+
+  const data = (response as any).candidates?.[0]?.content?.parts?.[0]?.inlineData?.data
+  if (!data) throw new Error('No audio data in TTS response')
+
+  // base64 → ArrayBuffer
+  const binaryString = atob(data)
+  const bytes = new Uint8Array(binaryString.length)
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i)
+  }
+  return bytes.buffer
+}
+
 // ── Fallback 결과 (API 실패 시) ──
 
 export function getFallbackResult(scenario: ScenarioType): AnalysisResult {

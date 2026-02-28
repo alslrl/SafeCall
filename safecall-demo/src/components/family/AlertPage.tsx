@@ -53,37 +53,33 @@ export default function AlertPage({ f7router }: { f7router: any }) {
           <HomecamView mode={camMode} />
         </div>
 
-        <div style={{ textAlign: 'center', padding: '12px 16px 0' }}>
-          <span
-            className={`alert-badge ${analysisResult.isFalseAlarm ? (isFire ? 'fire' : 'burglar') : 'fall'}`}
-          >
-            {analysisResult.isFalseAlarm ? (isFire ? '🔥' : '🚨') : '⚠️'} {analysisResult.category}
-          </span>
-          <div style={{ fontSize: 12, color: '#8e8e93', marginTop: 4 }}>
-            어머니가 {isBurglar ? '112' : '119'}에 전화 · 오늘 {new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
-          </div>
-        </div>
-
         <Card>
           <CardContent>
-            <div style={{ fontWeight: 600, fontSize: 13, color: '#8e8e93', marginBottom: 8 }}>
-              AI 분석 결과
-            </div>
-
-            <div className="confidence-ring-wrapper">
-              <svg className="confidence-ring" viewBox="0 0 100 100">
-                <circle className="confidence-ring-bg" cx="50" cy="50" r="42" />
-                <circle
-                  className="confidence-ring-fill"
-                  cx="50" cy="50" r="42"
-                  style={{ strokeDashoffset: `${264 - (264 * analysisResult.confidence / 100)}` }}
-                />
-              </svg>
-              <div className="confidence-number">{analysisResult.confidence}%</div>
-            </div>
-
-            <div style={{ fontSize: 12, textAlign: 'center', color: '#8e8e93', marginBottom: 12 }}>
-              확신도
+            <div className="alert-result-header">
+              <div className="confidence-ring-wrapper compact">
+                <svg className="confidence-ring" viewBox="0 0 100 100">
+                  <circle className="confidence-ring-bg" cx="50" cy="50" r="42" />
+                  <circle
+                    className="confidence-ring-fill"
+                    cx="50" cy="50" r="42"
+                    style={{ strokeDashoffset: `${264 - (264 * analysisResult.confidence / 100)}` }}
+                  />
+                </svg>
+                <div className="confidence-number">{analysisResult.confidence}%</div>
+              </div>
+              <div className="alert-result-info">
+                <span
+                  className={`alert-badge ${analysisResult.isFalseAlarm ? (isFire ? 'fire' : 'burglar') : 'fall'}`}
+                >
+                  {analysisResult.isFalseAlarm ? (isFire ? '🔥' : '🚨') : '⚠️'} {analysisResult.category}
+                </span>
+                <div style={{ fontSize: 12, color: '#8e8e93', marginTop: 6 }}>
+                  어머니가 {isBurglar ? '112' : '119'}에 전화
+                </div>
+                <div style={{ fontSize: 11, color: '#aeaeb2' }}>
+                  오늘 {new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
             </div>
 
             {analysisResult.findings.map((finding, i) => (

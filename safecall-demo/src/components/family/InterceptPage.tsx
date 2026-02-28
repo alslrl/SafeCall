@@ -42,30 +42,30 @@ export default function FamilyInterceptPage({ f7router }: { f7router: any }) {
           <HomecamView mode="normal" />
         </div>
 
-        <Block strong inset>
+        <Block strong inset style={{ marginTop: 8, marginBottom: 8 }}>
           <div className="intercept-status">
-            <div style={{ fontSize: 28, marginBottom: 8 }}>🛡️</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#007aff' }}>
+            <div style={{ fontSize: 24 }}>🛡️</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#007aff' }}>
               인터셉트 모드 활성화
             </div>
           </div>
         </Block>
 
-        <Card>
-          <CardContent>
-            <div style={{ fontSize: 14, color: '#8e8e93' }}>대상</div>
-            <div style={{ fontSize: 16, fontWeight: 600, marginTop: 2 }}>{targetLabel}</div>
+        <Card style={{ margin: '0 16px 8px' }}>
+          <CardContent style={{ padding: '12px 16px' }}>
+            <div style={{ fontSize: 13, color: '#8e8e93' }}>대상</div>
+            <div style={{ fontSize: 15, fontWeight: 600, marginTop: 2 }}>{targetLabel}</div>
 
-            <div style={{ marginTop: 16, fontSize: 14, color: '#8e8e93' }}>남은 시간</div>
+            <div style={{ marginTop: 10, fontSize: 13, color: '#8e8e93' }}>남은 시간</div>
             <div className="intercept-timer">{formatCountdown(remainingSeconds)}</div>
 
-            <div style={{ fontSize: 13, color: '#8e8e93', textAlign: 'center' }}>
+            <div style={{ fontSize: 12, color: '#8e8e93', textAlign: 'center' }}>
               어머니가 다시 {callNumber}를 누르면<br />AI가 안심 대화를 진행합니다
             </div>
           </CardContent>
         </Card>
 
-        <Block>
+        <Block style={{ marginBottom: 70 }}>
           <Button large fill color="red" onClick={handleRelease}>
             🔴 인터셉트 해제
           </Button>

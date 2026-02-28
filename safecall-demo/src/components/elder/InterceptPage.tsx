@@ -1,6 +1,8 @@
 import { Page } from 'framework7-react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAppState, type ScenarioType } from '../../context/AppStateContext'
+import { generateTTS } from '../../services/gemini'
+import { playPCMAudio, stopAudio } from '../../services/audioPlayer'
 
 const AI_MESSAGES: Record<ScenarioType, string[]> = {
   fire_false_alarm: [
@@ -30,7 +32,49 @@ export default function InterceptPage({ f7router }: { f7router: any }) {
   const { scenario, dialedNumber, setState } = useAppState()
   const [seconds, setSeconds] = useState(0)
   const [messageIndex, setMessageIndex] = useState(0)
+  const [isSpeaking, setIsSpeaking] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const stoppedRef = useRef(false)
+  const ttsStartedRef = useRef(false)
+
+  const messages = AI_MESSAGES[scenario]
+  const callNumber = dialedNumber || (scenario === 'burglar_false_alarm' ? '112' : '119')
+
+  // TTS 메시지 순차 재생
+  const playMessages = useCallback(async () => {
+    if (ttsStartedRef.current) return
+    ttsStartedRef.current = true
+
+    for (let i = 0; i < messages.length; i++) {
+      if (stoppedRef.current) break
+
+      setMessageIndex(i)
+      setIsSpeaking(true)
+
+      try {
+        const audioData = await generateTTS(messages[i])
+        if (stoppedRef.current) break
+        await playPCMAudio(audioData)
+      } catch {
+        // TTS 실패 시 3초 대기 후 다음 메시지
+        if (stoppedRef.current) break
+        await new Promise(r => setTimeout(r, 3000))
+      }
+
+      setIsSpeaking(false)
+
+      // 메시지 간 짧은 간격
+      if (!stoppedRef.current && i < messages.length - 1) {
+        await new Promise(r => setTimeout(r, 800))
+      }
+    }
+
+    // 모든 메시지 완료
+    if (!stoppedRef.current) {
+      await new Promise(r => setTimeout(r, 2000))
+      setState('RECALL_ALERT')
+    }
+  }, [messages, setState])
 
   useEffect(() => {
     setState('AI_CONVERSATION')
@@ -39,24 +83,14 @@ export default function InterceptPage({ f7router }: { f7router: any }) {
       setSeconds(prev => prev + 1)
     }, 1000)
 
+    playMessages()
+
     return () => {
+      stoppedRef.current = true
+      stopAudio()
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [setState])
-
-  const messages = AI_MESSAGES[scenario]
-  const callNumber = dialedNumber || (scenario === 'burglar_false_alarm' ? '112' : '119')
-
-  // 3초마다 다음 메시지 표시
-  useEffect(() => {
-    if (seconds > 0 && seconds % 3 === 0) {
-      setMessageIndex(prev => Math.min(prev + 1, messages.length - 1))
-    }
-    // 모든 메시지 완료 후 RECALL_ALERT
-    if (messageIndex === messages.length - 1 && seconds > messages.length * 3) {
-      setState('RECALL_ALERT')
-    }
-  }, [seconds, messageIndex, setState, messages])
+  }, [setState, playMessages])
 
   const formatTime = (s: number) => {
     const min = Math.floor(s / 60).toString().padStart(2, '0')
@@ -65,6 +99,8 @@ export default function InterceptPage({ f7router }: { f7router: any }) {
   }
 
   const handleEndCall = () => {
+    stoppedRef.current = true
+    stopAudio()
     if (timerRef.current) clearInterval(timerRef.current)
     setState('RECALL_ALERT')
     f7router.back()
@@ -81,7 +117,7 @@ export default function InterceptPage({ f7router }: { f7router: any }) {
 
         <div className="ai-conversation-box">
           <div className="ai-wave">
-            <div className="wave-bars">
+            <div className={`wave-bars ${isSpeaking ? 'active' : ''}`}>
               <div className="wave-bar" />
               <div className="wave-bar" />
               <div className="wave-bar" />
