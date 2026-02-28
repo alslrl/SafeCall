@@ -145,7 +145,83 @@ Realistic CCTV quality, slightly grainy. 15 seconds duration.
 
 ---
 
-## 시나리오 3: 정상 상태
+## 시나리오 3: 침입 망상 (치매 환각)
+
+### 목적
+치매 어르신이 환각/망상으로 "누군가 집에 들어왔다"고 확신하여 112에 신고하는 장면. 실제로는 **아무 일도 일어나지 않은** 조용한 밤. Gemini가 홈캠 영상을 분석하여 "침입 흔적 없음, 환각/망상 가능성"으로 판단하는 근거가 되는 영상.
+
+> **배경**: 알츠하이머나 루이소체 치매 환자들은 "집에 도둑이 들었다", "누군가 나를 감금했다"는 생생한 망상을 겪습니다. 이때 112 신고는 환자에게 아주 합리적인 생존 행동이지만, 실제로는 비응급 상황입니다.
+
+### 씬 구성
+
+| 씬 | 설명 | 시간 | Gemini 판단 |
+|----|------|------|------------|
+| 3-1 | 거실 전경 — 어두운 밤, 어르신 혼자 소파에 앉아 있음 | 0~3초 | 정상 (1인 재실) |
+| 3-2 | 어르신이 갑자기 불안한 표정으로 주위를 두리번거림 | 3~7초 | 불안 행동 감지, 외부 자극 없음 |
+| 3-3 | 일어나서 현관문/복도를 확인하러 감 (아무도 없음) | 7~12초 | 침입 흔적 없음, 문 잠김 상태 |
+| 3-4 | 돌아와서 전화기를 들고 112에 신고함 | 12~15초 | 비응급 확인 (환각/망상 가능성) |
+
+### 이미지 프롬프트
+
+**씬 3-1: 거실 전경 (어두운 밤, 혼자)**
+```
+A Korean apartment living room viewed from a wall-mounted security camera angle,
+slightly elevated perspective looking down. Dimly lit room at night,
+only a small table lamp on. An elderly Korean woman sitting alone on the sofa,
+looking slightly uneasy. The room is quiet and undisturbed — everything is in order.
+No other people or animals present. Night time.
+Realistic home CCTV footage style, slightly grainy quality, wide-angle lens.
+```
+
+**씬 3-2: 불안한 표정으로 두리번거림**
+```
+Same Korean apartment living room from wall-mounted security camera angle at night.
+An elderly Korean woman sitting on the sofa looking frightened and agitated,
+turning her head side to side as if hearing something. She is gripping
+the armrest tightly. The room around her is completely calm and undisturbed —
+no movement, no shadows, nothing out of place. She appears to be reacting
+to something that is not visible on camera.
+Dim lighting. Realistic home CCTV footage, slightly grainy.
+```
+
+**씬 3-3: 현관문 확인 (아무도 없음)**
+```
+Same Korean apartment from wall-mounted security camera angle at night.
+An elderly Korean woman cautiously walking toward the front door/hallway,
+peering around the corner with a fearful expression. The hallway is empty
+and the front door is clearly closed and locked. There is absolutely no sign
+of intrusion — no broken items, no open windows, no unusual shadows.
+The apartment is perfectly still and safe.
+Dim lighting. Realistic home CCTV footage style, slightly grainy.
+```
+
+**씬 3-4: 112 신고**
+```
+Same Korean apartment living room from wall-mounted security camera angle at night.
+An elderly Korean woman back on the sofa, holding a smartphone to her ear
+with a trembling hand, speaking urgently. Her expression shows genuine fear
+and distress. However, the room behind her is completely peaceful and undisturbed.
+There is a stark contrast between her panicked state and the calm, safe environment.
+Dim lighting, night time. Realistic home CCTV footage style, slightly grainy.
+```
+
+### Veo 영상 프롬프트 (씬 3-1 이미지 기반)
+```
+Home security camera footage of a Korean apartment living room at night.
+Dim lighting with only a table lamp. An elderly woman is sitting alone on the sofa.
+She suddenly looks frightened, turning her head as if hearing something —
+but the room is completely quiet and undisturbed. She stands up cautiously
+and walks toward the hallway to check the front door. The hallway is empty,
+the door is closed. She returns to the sofa looking distressed and picks up
+her phone to make an urgent call. Throughout the entire scene, the apartment
+remains perfectly calm with no signs of intrusion or disturbance.
+Fixed camera angle, no camera movement. Night CCTV quality,
+slightly grainy. 15 seconds duration.
+```
+
+---
+
+## 시나리오 4: 정상 상태
 
 ### 목적
 평화로운 일상 장면. Gemini가 "이상 없음"으로 판단하는 기준선(baseline) 영상. 데모 대시보드에서 "현재 홈캠 상태"로 보여줄 수 있음.
@@ -204,8 +280,9 @@ Realistic CCTV quality, slightly grainy. 15 seconds duration.
 ### Step 1: Nano/Banana 이미지 생성
 1. 씬 1-1, 1-2, 1-3, 1-4 이미지 생성 (화재 오인)
 2. 씬 2-1, 2-2, 2-3, 2-4 이미지 생성 (낙상)
-3. 씬 3-1, 3-2, 3-3 이미지 생성 (정상)
-4. **핵심**: 같은 배경(아파트)이 일관되게 유지되어야 함 → 씬 1 시리즈는 같은 부엌, 씬 2·3은 같은 거실
+3. 씬 3-1, 3-2, 3-3, 3-4 이미지 생성 (강도 오인)
+4. 씬 4-1, 4-2, 4-3 이미지 생성 (정상)
+5. **핵심**: 같은 배경(아파트)이 일관되게 유지되어야 함 → 씬 1 시리즈는 같은 부엌, 씬 2·3·4는 같은 거실
 
 ### Step 2: 이미지 검수
 - 홈캠 시점이 일관적인지 확인
@@ -216,7 +293,7 @@ Realistic CCTV quality, slightly grainy. 15 seconds duration.
 ### Step 3: Veo 3.1 영상 생성
 - 각 시나리오의 핵심 씬 이미지를 참조 이미지로 사용
 - Veo 프롬프트 + 참조 이미지 → 15초 영상 생성
-- 총 3개 영상 (화재 오인, 낙상, 정상)
+- 총 4개 영상 (화재 오인, 낙상, 강도 오인, 정상)
 
 ### Step 4: 후처리
 - 타임스탬프 오버레이 추가 (HH:MM:SS 형식, 우하단)

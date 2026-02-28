@@ -1,17 +1,40 @@
-import { Page, Navbar, Card, CardContent, Button, Block } from 'framework7-react'
+import { Page, Navbar, Card, CardContent, Button, Block, Preloader } from 'framework7-react'
 import { useAppState } from '../../context/AppStateContext'
 import HomecamView from '../shared/HomecamView'
 
 export default function AlertPage({ f7router }: { f7router: any }) {
-  const { scenario, setState } = useAppState()
+  const { scenario, analysisResult, isAnalyzing, setState } = useAppState()
   const isFire = scenario === 'fire_false_alarm'
-  const isFall = scenario === 'fall_detected'
   const isBurglar = scenario === 'burglar_false_alarm'
-  const isFalseAlarm = isFire || isBurglar
 
   const handleConfirmFalseAlarm = () => {
     setState('INTERCEPT_ACTIVE')
     f7router.navigate('/intercept/')
+  }
+
+  if (isAnalyzing || !analysisResult) {
+    return (
+      <Page>
+        <Navbar title="SafeCall 보호자" backLink="뒤로" />
+        <Block strong inset>
+          <div className="alert-header">
+            <div style={{ fontSize: 28, marginBottom: 4 }}>🚨</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#ff3b30' }}>
+              긴급 알림
+            </div>
+            <div style={{ fontSize: 14, color: '#8e8e93', marginTop: 4 }}>
+              어머니가 {isBurglar ? '112' : '119'}에 전화했습니다
+            </div>
+          </div>
+        </Block>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 0' }}>
+          <Preloader size={32} />
+          <div style={{ marginTop: 16, fontSize: 14, color: '#8e8e93' }}>
+            AI 분석 중...
+          </div>
+        </div>
+      </Page>
+    )
   }
 
   return (
@@ -41,27 +64,37 @@ export default function AlertPage({ f7router }: { f7router: any }) {
 
           <div style={{ textAlign: 'center', marginBottom: 12 }}>
             <span
-              className={`alert-badge ${isFire ? 'fire' : isBurglar ? 'burglar' : 'fall'}`}
+              className={`alert-badge ${analysisResult.isFalseAlarm ? (isFire ? 'fire' : 'burglar') : 'fall'}`}
             >
-              {isFire ? '🔥 화재 오인 가능성' : isBurglar ? '🚨 강도 침입 오인 가능성' : '⚠️ 낙상 감지'}
+              {analysisResult.isFalseAlarm ? (isFire ? '🔥' : '🚨') : '⚠️'} {analysisResult.category}
             </span>
           </div>
 
           <div className="confidence-number">
-            {isFire ? '95' : isBurglar ? '92' : '94'}%
+            {analysisResult.confidence}%
           </div>
 
           <div style={{ fontSize: 12, textAlign: 'center', color: '#8e8e93', marginBottom: 12 }}>
             확신도
           </div>
 
-          <div className="analysis-item">
-            <span>{isFall ? '🔴' : '🟢'}</span>
-            <span>{isFire ? '수증기 감지' : isBurglar ? '반려동물 움직임 감지' : '바닥에 누운 사람 감지'}</span>
-          </div>
-          <div className="analysis-item">
-            <span>❌</span>
-            <span>{isFire ? '화재 징후 없음' : isBurglar ? '침입 징후 없음' : '정상 활동 아님'}</span>
+          {analysisResult.findings.map((finding, i) => (
+            <div className="analysis-item" key={i}>
+              <span>{finding.emoji}</span>
+              <span>{finding.text}</span>
+            </div>
+          ))}
+
+          <div style={{
+            marginTop: 12,
+            padding: '10px 12px',
+            background: '#f2f2f7',
+            borderRadius: 8,
+            fontSize: 13,
+            color: '#3c3c43',
+            lineHeight: 1.5,
+          }}>
+            {analysisResult.reasoning}
           </div>
         </CardContent>
       </Card>
@@ -74,7 +107,7 @@ export default function AlertPage({ f7router }: { f7router: any }) {
       </div>
 
       <Block>
-        {isFalseAlarm ? (
+        {analysisResult.isFalseAlarm ? (
           <>
             <Button large fill color="green" onClick={handleConfirmFalseAlarm}>
               ✅ 오인 확인

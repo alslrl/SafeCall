@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/genai": "^1.43.0",
     "framework7": "^9.0.3",
     "framework7-react": "^9.0.3",
     "react": "^19.2.0",

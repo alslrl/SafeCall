@@ -7,7 +7,7 @@ export default function FamilyInterceptPage({ f7router }: { f7router: any }) {
   const { scenario, setState } = useAppState()
   const isBurglar = scenario === 'burglar_false_alarm'
   const callNumber = isBurglar ? '112' : '119'
-  const targetLabel = isBurglar ? '강도 침입 오인 건' : '화재 오인 건'
+  const targetLabel = isBurglar ? '침입 망상 건' : '화재 오인 건'
   const [remainingSeconds, setRemainingSeconds] = useState(2 * 60 * 60) // 2시간
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 

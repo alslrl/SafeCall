@@ -1,6 +1,7 @@
 import { Page } from 'framework7-react'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAppState, type ScenarioType } from '../../context/AppStateContext'
+import { analyzeScenario, getFallbackResult } from '../../services/gemini'
 
 const PRESETS: Record<ScenarioType, string[]> = {
   fire_false_alarm: [
@@ -13,14 +14,14 @@ const PRESETS: Record<ScenarioType, string[]> = {
   ],
   burglar_false_alarm: [
     '도둑이요! 누가 집에 들어왔어요!',
-    '소리가 나요! 누가 있는 것 같아요!',
+    '누가 있어요! 무서워요! 빨리 와주세요!',
   ],
 }
 
 type VoiceState = 'idle' | 'preset_selected' | 'recording' | 'recorded' | 'sending' | 'analyzing'
 
 export default function CallPage({ f7router }: { f7router: any }) {
-  const { state, scenario, dialedNumber, setState } = useAppState()
+  const { state, scenario, dialedNumber, setState, setAnalysisResult, setIsAnalyzing } = useAppState()
   const [connected, setConnected] = useState(false)
   const [seconds, setSeconds] = useState(0)
   const [voiceState, setVoiceState] = useState<VoiceState>('idle')
@@ -103,18 +104,29 @@ export default function CallPage({ f7router }: { f7router: any }) {
     }
   }, [])
 
-  const handleSend = useCallback(() => {
+  const handleSend = useCallback(async () => {
     setVoiceState('sending')
+    setIsAnalyzing(true)
 
-    setTimeout(() => {
-      setState('ANALYZING')
-      setVoiceState('analyzing')
+    const callerMessage = selectedPreset !== null
+      ? PRESETS[scenario][selectedPreset]
+      : '사용자가 직접 음성으로 상황을 설명했습니다'
 
-      setTimeout(() => {
-        setState('ALERT_SENT')
-      }, 2000)
-    }, 1000)
-  }, [setState])
+    await new Promise(resolve => setTimeout(resolve, 800))
+    setState('ANALYZING')
+    setVoiceState('analyzing')
+
+    try {
+      const result = await analyzeScenario(scenario, callerMessage)
+      setAnalysisResult(result)
+    } catch (error) {
+      console.error('Gemini API error, using fallback:', error)
+      setAnalysisResult(getFallbackResult(scenario))
+    } finally {
+      setIsAnalyzing(false)
+      setState('ALERT_SENT')
+    }
+  }, [setState, setAnalysisResult, setIsAnalyzing, scenario, selectedPreset])
 
   const handleEndCall = () => {
     if (timerRef.current) clearInterval(timerRef.current)

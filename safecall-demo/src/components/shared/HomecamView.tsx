@@ -2,7 +2,7 @@ const STATUS_MAP = {
   normal: { text: '정상', emoji: '🟢', color: '#34c759' },
   fire: { text: '수증기 감지', emoji: '🔥', color: '#f59e0b' },
   fall: { text: '낙상 감지', emoji: '⚠️', color: '#ef4444' },
-  burglar: { text: '움직임 감지', emoji: '🚨', color: '#8b5cf6' },
+  burglar: { text: '이상 행동 감지', emoji: '🚨', color: '#8b5cf6' },
 }
 
 type CamMode = 'normal' | 'fire' | 'fall' | 'burglar'

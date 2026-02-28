@@ -94,7 +94,7 @@
   justify-self: end;
   display: flex;
   align-items: center;
-  gap: 0px;
+  gap: 4px;
 }
 
 .status-bar-icon {
@@ -105,6 +105,7 @@
 .status-bar-battery {
   font-size: 20px;
   color: #000;
+  transform: rotate(90deg);
 }
 
 .phone-screen {

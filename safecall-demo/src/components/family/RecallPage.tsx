@@ -7,7 +7,7 @@ export default function RecallPage() {
   const isBurglar = scenario === 'burglar_false_alarm'
   const callNumber = isBurglar ? '112' : '119'
   const summaryText = isBurglar
-    ? '"강도 침입 오인 상황 설명. 반려동물 움직임 확인 전달. 어르신 안심하심."'
+    ? '"침입 망상 상황 안내. 집 안 안전 확인 전달. 어르신 안심하심."'
     : '"화재 오인 상황 설명. 집 안 안전 확인 전달. 어르신 안심하심."'
 
   return (

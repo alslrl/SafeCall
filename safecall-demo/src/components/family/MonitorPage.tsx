@@ -1,7 +1,16 @@
 import { Page, Navbar, Card, CardContent } from 'framework7-react'
+import { useEffect } from 'react'
+import { useAppState } from '../../context/AppStateContext'
 import HomecamView from '../shared/HomecamView'
 
-export default function MonitorPage() {
+export default function MonitorPage({ f7router }: { f7router: any }) {
+  const { state } = useAppState()
+
+  useEffect(() => {
+    if (state === 'ALERT_SENT') {
+      f7router.navigate('/alert/')
+    }
+  }, [state, f7router])
   return (
     <Page>
       <Navbar title="SafeCall 보호자" />
