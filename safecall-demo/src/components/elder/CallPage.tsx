@@ -18,19 +18,18 @@ const PRESETS: Record<ScenarioType, string[]> = {
   ],
 }
 
-type VoiceState = 'idle' | 'preset_selected' | 'recording' | 'recorded' | 'sending' | 'analyzing'
-
 export default function CallPage({ f7router }: { f7router: any }) {
   const { state, scenario, dialedNumber, setState, setAnalysisResult, setIsAnalyzing } = useAppState()
   const [connected, setConnected] = useState(false)
   const [seconds, setSeconds] = useState(0)
-  const [voiceState, setVoiceState] = useState<VoiceState>('idle')
+  const [sent, setSent] = useState(false)
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null)
+  const [recording, setRecording] = useState(false)
+  const [recorded, setRecorded] = useState(false)
   const [recordSeconds, setRecordSeconds] = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const audioBlobRef = useRef<Blob | null>(null)
 
   const callNumber = dialedNumber || (scenario === 'burglar_false_alarm' ? '112' : '119')
 
@@ -62,8 +61,7 @@ export default function CallPage({ f7router }: { f7router: any }) {
 
   const handleSelectPreset = (index: number) => {
     setSelectedPreset(index)
-    setVoiceState('preset_selected')
-    // 녹음 관련 상태 초기화
+    setRecorded(false)
     stopRecording()
   }
 
@@ -71,18 +69,16 @@ export default function CallPage({ f7router }: { f7router: any }) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       const recorder = new MediaRecorder(stream)
-      const chunks: BlobPart[] = []
 
-      recorder.ondataavailable = (e) => chunks.push(e.data)
       recorder.onstop = () => {
-        audioBlobRef.current = new Blob(chunks, { type: 'audio/webm' })
         stream.getTracks().forEach(t => t.stop())
-        setVoiceState('recorded')
+        setRecording(false)
+        setRecorded(true)
       }
 
       mediaRecorderRef.current = recorder
       recorder.start()
-      setVoiceState('recording')
+      setRecording(true)
       setSelectedPreset(null)
       setRecordSeconds(0)
 
@@ -105,16 +101,13 @@ export default function CallPage({ f7router }: { f7router: any }) {
   }, [])
 
   const handleSend = useCallback(async () => {
-    setVoiceState('sending')
+    setSent(true)
     setIsAnalyzing(true)
+    setState('ANALYZING')
 
     const callerMessage = selectedPreset !== null
       ? PRESETS[scenario][selectedPreset]
       : '사용자가 직접 음성으로 상황을 설명했습니다'
-
-    await new Promise(resolve => setTimeout(resolve, 800))
-    setState('ANALYZING')
-    setVoiceState('analyzing')
 
     try {
       const result = await analyzeScenario(scenario, callerMessage)
@@ -137,7 +130,7 @@ export default function CallPage({ f7router }: { f7router: any }) {
     f7router.back()
   }
 
-  const canSend = voiceState === 'preset_selected' || voiceState === 'recorded'
+  const canSend = selectedPreset !== null || recorded
 
   return (
     <Page noNavbar noToolbar>
@@ -152,8 +145,8 @@ export default function CallPage({ f7router }: { f7router: any }) {
           )}
         </div>
 
-        {/* 음성 입력 영역 - 연결 후 표시 */}
-        {connected && voiceState !== 'sending' && voiceState !== 'analyzing' && (
+        {/* 음성 입력 영역 - 연결 후 & 전송 전에만 표시 */}
+        {connected && !sent && (
           <div className="voice-input-section">
             <div className="voice-section-title">상황 설명</div>
 
@@ -177,12 +170,12 @@ export default function CallPage({ f7router }: { f7router: any }) {
             </div>
 
             {/* 녹음 버튼 */}
-            {voiceState === 'recording' ? (
+            {recording ? (
               <button className="record-btn recording" onClick={stopRecording}>
                 <span className="record-dot" />
                 <span>녹음 중 {formatTime(recordSeconds)}</span>
               </button>
-            ) : voiceState === 'recorded' ? (
+            ) : recorded ? (
               <div className="record-btn recorded">
                 <span>✅ 녹음 완료 ({formatTime(recordSeconds)})</span>
               </div>
@@ -201,20 +194,6 @@ export default function CallPage({ f7router }: { f7router: any }) {
             >
               📤 전송
             </button>
-          </div>
-        )}
-
-        {/* 전송/분석 상태 */}
-        {voiceState === 'sending' && (
-          <div className="voice-status">
-            <div className="voice-status-spinner" />
-            <span>음성 전송 중...</span>
-          </div>
-        )}
-        {voiceState === 'analyzing' && (
-          <div className="voice-status analyzing">
-            <div className="voice-status-spinner" />
-            <span>AI 분석 중...</span>
           </div>
         )}
 

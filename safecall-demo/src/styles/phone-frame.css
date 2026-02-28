@@ -128,10 +128,10 @@
 }
 
 .phone-label {
-  color: #666;
-  font-size: 13px;
-  margin-top: 12px;
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  margin-bottom: 10px;
+  font-weight: 600;
   letter-spacing: 0.5px;
 }
 

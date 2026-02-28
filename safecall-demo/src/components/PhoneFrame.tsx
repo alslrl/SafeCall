@@ -9,6 +9,7 @@ interface PhoneFrameProps {
 export default function PhoneFrame({ label, children, statusBarBg = '#fff' }: PhoneFrameProps) {
   return (
     <div className="phone-outer">
+      <div className="phone-label">{label}</div>
       <div className="phone-frame">
         {/* 상태바 + Dynamic Island */}
         <div className="phone-status-bar" style={{ background: statusBarBg }}>
@@ -27,7 +28,6 @@ export default function PhoneFrame({ label, children, statusBarBg = '#fff' }: Ph
         </div>
         <div className="phone-home-bar" />
       </div>
-      <div className="phone-label">{label}</div>
     </div>
   )
 }
