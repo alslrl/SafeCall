@@ -5,6 +5,9 @@ import HomecamView from '../shared/HomecamView'
 export default function AlertPage({ f7router }: { f7router: any }) {
   const { scenario, setState } = useAppState()
   const isFire = scenario === 'fire_false_alarm'
+  const isFall = scenario === 'fall_detected'
+  const isBurglar = scenario === 'burglar_false_alarm'
+  const isFalseAlarm = isFire || isBurglar
 
   const handleConfirmFalseAlarm = () => {
     setState('INTERCEPT_ACTIVE')
@@ -22,7 +25,7 @@ export default function AlertPage({ f7router }: { f7router: any }) {
             긴급 알림
           </div>
           <div style={{ fontSize: 14, color: '#8e8e93', marginTop: 4 }}>
-            어머니가 119에 전화했습니다
+            어머니가 {isBurglar ? '112' : '119'}에 전화했습니다
           </div>
           <div style={{ fontSize: 12, color: '#c7c7cc', marginTop: 2 }}>
             오늘 {new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
@@ -38,14 +41,14 @@ export default function AlertPage({ f7router }: { f7router: any }) {
 
           <div style={{ textAlign: 'center', marginBottom: 12 }}>
             <span
-              className={`alert-badge ${isFire ? 'fire' : 'fall'}`}
+              className={`alert-badge ${isFire ? 'fire' : isBurglar ? 'burglar' : 'fall'}`}
             >
-              {isFire ? '🔥 화재 오인 가능성' : '⚠️ 낙상 감지'}
+              {isFire ? '🔥 화재 오인 가능성' : isBurglar ? '🚨 강도 침입 오인 가능성' : '⚠️ 낙상 감지'}
             </span>
           </div>
 
           <div className="confidence-number">
-            {isFire ? '95' : '94'}%
+            {isFire ? '95' : isBurglar ? '92' : '94'}%
           </div>
 
           <div style={{ fontSize: 12, textAlign: 'center', color: '#8e8e93', marginBottom: 12 }}>
@@ -53,12 +56,12 @@ export default function AlertPage({ f7router }: { f7router: any }) {
           </div>
 
           <div className="analysis-item">
-            <span>{isFire ? '🟢' : '🔴'}</span>
-            <span>{isFire ? '수증기 감지' : '바닥에 누운 사람 감지'}</span>
+            <span>{isFall ? '🔴' : '🟢'}</span>
+            <span>{isFire ? '수증기 감지' : isBurglar ? '반려동물 움직임 감지' : '바닥에 누운 사람 감지'}</span>
           </div>
           <div className="analysis-item">
-            <span>{isFire ? '❌' : '❌'}</span>
-            <span>{isFire ? '화재 징후 없음' : '정상 활동 아님'}</span>
+            <span>❌</span>
+            <span>{isFire ? '화재 징후 없음' : isBurglar ? '침입 징후 없음' : '정상 활동 아님'}</span>
           </div>
         </CardContent>
       </Card>
@@ -67,11 +70,11 @@ export default function AlertPage({ f7router }: { f7router: any }) {
         <div style={{ fontSize: 13, fontWeight: 600, color: '#8e8e93', marginBottom: 8, paddingLeft: 4 }}>
           홈캠 영상
         </div>
-        <HomecamView mode={isFire ? 'fire' : 'fall'} />
+        <HomecamView mode={isFire ? 'fire' : isBurglar ? 'burglar' : 'fall'} />
       </div>
 
       <Block>
-        {isFire ? (
+        {isFalseAlarm ? (
           <>
             <Button large fill color="green" onClick={handleConfirmFalseAlarm}>
               ✅ 오인 확인

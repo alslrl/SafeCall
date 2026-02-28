@@ -19,7 +19,7 @@ const KEYS = [
 
 export default function DialerPage({ f7router }: { f7router: any }) {
   const [number, setNumber] = useState('')
-  const { state, setState } = useAppState()
+  const { state, setState, setDialedNumber } = useAppState()
 
   const handleKey = useCallback((key: string) => {
     setNumber(prev => prev + key)
@@ -31,6 +31,7 @@ export default function DialerPage({ f7router }: { f7router: any }) {
 
   const handleCall = useCallback(() => {
     if (number === '119' || number === '112') {
+      setDialedNumber(number)
       setState('CALLING_119')
       if (state === 'INTERCEPT_ACTIVE') {
         setState('INTERCEPT_CALL')
@@ -40,7 +41,7 @@ export default function DialerPage({ f7router }: { f7router: any }) {
       }
       setNumber('')
     }
-  }, [number, state, setState, f7router])
+  }, [number, state, setState, setDialedNumber, f7router])
 
   return (
     <Page noNavbar className="dialer-page">

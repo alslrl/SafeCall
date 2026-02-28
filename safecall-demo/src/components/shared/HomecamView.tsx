@@ -2,9 +2,10 @@ const STATUS_MAP = {
   normal: { text: '정상', emoji: '🟢', color: '#34c759' },
   fire: { text: '수증기 감지', emoji: '🔥', color: '#f59e0b' },
   fall: { text: '낙상 감지', emoji: '⚠️', color: '#ef4444' },
+  burglar: { text: '움직임 감지', emoji: '🚨', color: '#8b5cf6' },
 }
 
-type CamMode = 'normal' | 'fire' | 'fall'
+type CamMode = 'normal' | 'fire' | 'fall' | 'burglar'
 
 export default function HomecamView({ mode = 'normal' }: { mode?: CamMode }) {
   const status = STATUS_MAP[mode]

@@ -4,7 +4,10 @@ import { useAppState } from '../../context/AppStateContext'
 import HomecamView from '../shared/HomecamView'
 
 export default function FamilyInterceptPage({ f7router }: { f7router: any }) {
-  const { setState } = useAppState()
+  const { scenario, setState } = useAppState()
+  const isBurglar = scenario === 'burglar_false_alarm'
+  const callNumber = isBurglar ? '112' : '119'
+  const targetLabel = isBurglar ? '강도 침입 오인 건' : '화재 오인 건'
   const [remainingSeconds, setRemainingSeconds] = useState(2 * 60 * 60) // 2시간
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -46,13 +49,13 @@ export default function FamilyInterceptPage({ f7router }: { f7router: any }) {
       <Card>
         <CardContent>
           <div style={{ fontSize: 14, color: '#8e8e93' }}>대상</div>
-          <div style={{ fontSize: 16, fontWeight: 600, marginTop: 2 }}>화재 오인 건</div>
+          <div style={{ fontSize: 16, fontWeight: 600, marginTop: 2 }}>{targetLabel}</div>
 
           <div style={{ marginTop: 16, fontSize: 14, color: '#8e8e93' }}>남은 시간</div>
           <div className="intercept-timer">{formatCountdown(remainingSeconds)}</div>
 
           <div style={{ fontSize: 13, color: '#8e8e93', textAlign: 'center' }}>
-            어머니가 다시 119를 누르면<br />AI가 안심 대화를 진행합니다
+            어머니가 다시 {callNumber}를 누르면<br />AI가 안심 대화를 진행합니다
           </div>
         </CardContent>
       </Card>

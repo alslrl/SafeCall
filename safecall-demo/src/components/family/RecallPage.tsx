@@ -3,7 +3,12 @@ import { useAppState } from '../../context/AppStateContext'
 import HomecamView from '../shared/HomecamView'
 
 export default function RecallPage() {
-  const { state } = useAppState()
+  const { state, scenario } = useAppState()
+  const isBurglar = scenario === 'burglar_false_alarm'
+  const callNumber = isBurglar ? '112' : '119'
+  const summaryText = isBurglar
+    ? '"강도 침입 오인 상황 설명. 반려동물 움직임 확인 전달. 어르신 안심하심."'
+    : '"화재 오인 상황 설명. 집 안 안전 확인 전달. 어르신 안심하심."'
 
   return (
     <Page>
@@ -16,7 +21,7 @@ export default function RecallPage() {
             재전화 감지
           </div>
           <div style={{ fontSize: 14, color: '#8e8e93', marginTop: 6 }}>
-            어머니가 119를 다시 눌렀습니다
+            어머니가 {callNumber}를 다시 눌렀습니다
           </div>
           <div style={{ fontSize: 12, color: '#c7c7cc', marginTop: 2 }}>
             오늘 {new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
@@ -41,7 +46,7 @@ export default function RecallPage() {
               lineHeight: 1.5,
               color: '#3a3a3c',
             }}>
-              "화재 오인 상황 설명. 집 안 안전 확인 전달. 어르신 안심하심."
+              {summaryText}
             </div>
           </CardContent>
         </Card>

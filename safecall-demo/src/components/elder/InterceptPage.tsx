@@ -1,17 +1,33 @@
 import { Page } from 'framework7-react'
 import { useState, useEffect, useRef } from 'react'
-import { useAppState } from '../../context/AppStateContext'
+import { useAppState, type ScenarioType } from '../../context/AppStateContext'
 
-const AI_MESSAGES = [
-  '어머니, 안녕하세요.',
-  '아까 확인했는데 집 안은 안전해요.',
-  '부엌에서 수증기가 올라온 것이었어요.',
-  '불은 나지 않았으니 걱정 마세요.',
-  '따님께도 알려드렸으니 안심하세요.',
-]
+const AI_MESSAGES: Record<ScenarioType, string[]> = {
+  fire_false_alarm: [
+    '어머니, 안녕하세요.',
+    '아까 확인했는데 집 안은 안전해요.',
+    '부엌에서 수증기가 올라온 것이었어요.',
+    '불은 나지 않았으니 걱정 마세요.',
+    '따님께도 알려드렸으니 안심하세요.',
+  ],
+  fall_detected: [
+    '어머니, 안녕하세요.',
+    '아까 확인했는데 집 안은 안전해요.',
+    '부엌에서 수증기가 올라온 것이었어요.',
+    '불은 나지 않았으니 걱정 마세요.',
+    '따님께도 알려드렸으니 안심하세요.',
+  ],
+  burglar_false_alarm: [
+    '어머니, 안녕하세요.',
+    '확인했는데 집 안에는 아무도 없어요.',
+    '고양이가 움직인 것이었어요.',
+    '경찰에 연락할 필요 없으니 안심하세요.',
+    '따님께도 알려드렸어요.',
+  ],
+}
 
 export default function InterceptPage({ f7router }: { f7router: any }) {
-  const { setState } = useAppState()
+  const { scenario, dialedNumber, setState } = useAppState()
   const [seconds, setSeconds] = useState(0)
   const [messageIndex, setMessageIndex] = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -28,16 +44,19 @@ export default function InterceptPage({ f7router }: { f7router: any }) {
     }
   }, [setState])
 
+  const messages = AI_MESSAGES[scenario]
+  const callNumber = dialedNumber || (scenario === 'burglar_false_alarm' ? '112' : '119')
+
   // 3초마다 다음 메시지 표시
   useEffect(() => {
     if (seconds > 0 && seconds % 3 === 0) {
-      setMessageIndex(prev => Math.min(prev + 1, AI_MESSAGES.length - 1))
+      setMessageIndex(prev => Math.min(prev + 1, messages.length - 1))
     }
     // 모든 메시지 완료 후 RECALL_ALERT
-    if (messageIndex === AI_MESSAGES.length - 1 && seconds > AI_MESSAGES.length * 3) {
+    if (messageIndex === messages.length - 1 && seconds > messages.length * 3) {
       setState('RECALL_ALERT')
     }
-  }, [seconds, messageIndex, setState])
+  }, [seconds, messageIndex, setState, messages])
 
   const formatTime = (s: number) => {
     const min = Math.floor(s / 60).toString().padStart(2, '0')
@@ -55,7 +74,7 @@ export default function InterceptPage({ f7router }: { f7router: any }) {
     <Page noNavbar noToolbar>
       <div className="call-screen">
         <div className="call-info">
-          <div className="call-number" style={{ color: '#34c759' }}>119</div>
+          <div className="call-number" style={{ color: '#34c759' }}>{callNumber}</div>
           <div className="call-status connected">통화 중</div>
           <div className="call-timer">{formatTime(seconds)}</div>
         </div>
@@ -72,7 +91,7 @@ export default function InterceptPage({ f7router }: { f7router: any }) {
             <span>AI 음성</span>
           </div>
           <div className="ai-text">
-            {AI_MESSAGES.slice(0, messageIndex + 1).map((msg, i) => (
+            {messages.slice(0, messageIndex + 1).map((msg: string, i: number) => (
               <p key={i} style={{ marginBottom: 8, opacity: i === messageIndex ? 1 : 0.6 }}>
                 {msg}
               </p>

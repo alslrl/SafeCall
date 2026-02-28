@@ -13,7 +13,7 @@ export type AppState =
   | 'AI_CONVERSATION'
   | 'RECALL_ALERT'
 
-export type ScenarioType = 'fire_false_alarm' | 'fall_detected'
+export type ScenarioType = 'fire_false_alarm' | 'fall_detected' | 'burglar_false_alarm'
 
 interface AppStateContextType {
   state: AppState

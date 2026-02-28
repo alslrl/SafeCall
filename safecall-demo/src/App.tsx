@@ -1,6 +1,7 @@
 import { App, View } from 'framework7-react'
 import { AppStateProvider } from './context/AppStateContext'
 import PhoneFrame from './components/PhoneFrame'
+import DemoControlPanel from './components/DemoControlPanel'
 import { elderRoutes, familyRoutes } from './routes'
 
 const f7params = {
@@ -22,8 +23,10 @@ export default function SafeCallApp() {
           </div>
 
           <div className="phones-wrapper">
+            <DemoControlPanel />
+
             <div className="phone-column">
-              <PhoneFrame label="어르신 폰">
+              <PhoneFrame label="김영숙 (78세)">
                 <View
                   url="/"
                   routes={elderRoutes}
@@ -34,7 +37,7 @@ export default function SafeCallApp() {
             </div>
 
             <div className="phone-column">
-              <PhoneFrame label="가족 폰">
+              <PhoneFrame label="김지현 (딸)" statusBarBg="#efeff4">
                 <View
                   url="/"
                   routes={familyRoutes}
